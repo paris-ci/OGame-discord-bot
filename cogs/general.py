@@ -49,7 +49,7 @@ class General():
         # player_parsed = {"positions" : [], "planets": [], "alliance": {"name" : "Aucune", "tag": "NULL", "id": 000000}}
 
         for position in p["positions"]:
-            e.add_field(name=position["name"], value=f"{position['score']} @ {position['place']}")
+            e.add_field(name=position["name"], value=f"{position['score']} @ {position['position']}")
 
         await self.bot.send_message(ctx=ctx, mention=False, embed=e)
 

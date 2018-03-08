@@ -12,7 +12,20 @@ WEEK = 7 * DAY
 
 positions_names = {0: "Total", 1: "Economie", 2: "Recherche", 3: "Militaire", 4: "Militaire (pertes)", 5: "Militaire (construit)", 6: "Militaire (détruit)", 7: "Honneur", }
 
-cache_time = {"players.xml": DAY, "universe.xml": WEEK, "playerData.xml": WEEK, "highscore.xml": HOUR, "alliances.xml": DAY, "serverData.xml": DAY, "universes.xml": DAY}
+cache_time = {"players.xml": DAY,
+              "universe.xml": WEEK,
+              "playerData.xml": WEEK,
+              "highscore.xml?category=1&type=0": HOUR,
+              "highscore.xml?category=1&type=1": HOUR,
+              "highscore.xml?category=1&type=2": HOUR,
+              "highscore.xml?category=1&type=3": HOUR,
+              "highscore.xml?category=1&type=4": HOUR,
+              "highscore.xml?category=1&type=5": HOUR,
+              "highscore.xml?category=1&type=6": HOUR,
+              "highscore.xml?category=1&type=7": HOUR,
+              "alliances.xml": DAY,
+              "serverData.xml": DAY,
+              "universes.xml": DAY}
 
 
 class OGame_API():
@@ -84,14 +97,16 @@ class OGame_API():
         player_parsed = {"positions": [], "planets": [], "alliance": {"name": "Aucune", "tag": "NULL", "id": 000000}}
         player_parsed.update(dict(root.attrib))
 
-        positions = root.xpath("//positions")
+        #positions = root.xpath("//positions")
 
-        for position in positions[0]:
-            position_parsed = dict(position.attrib)
-            position_parsed["type"] = int(position_parsed["type"])
-            position_parsed["place"] = position.text
-            position_parsed["name"] = positions_names[position_parsed["type"]]
-            player_parsed["positions"].append(position_parsed)
+        #for position in positions[0]:
+        #    position_parsed = dict(position.attrib)
+        #    position_parsed["type"] = int(position_parsed["type"])
+        #    position_parsed["position"] = position.text
+        #    position_parsed["name"] = positions_names[position_parsed["type"]]
+        #    player_parsed["positions"].append(position_parsed)
+
+        player_parsed["positions"] = await self.get_player_positions(server_id, player_id)
 
         planets = root.xpath("//planets")
 
@@ -112,6 +127,19 @@ class OGame_API():
             pass
 
         return player_parsed
+
+    async def get_player_positions(self, server_id, player_id):
+        positions = []
+        for i in range(8): # 7 positions to get
+            root = await self.get_root(server_id, f"highscore.xml?category=1&type={i}")
+            player = root.xpath(f"//player[@id={player_id}]")[0]
+            position = dict(player.attrib)
+            position["name"] = positions_names[i]
+            position["type"] = i
+            positions.append(position)
+
+        return positions
+
 
     async def get_alliance_dict_from_id(self, server_id, alliance_id) -> dict:
         root = await self.get_root(server_id=server_id, file="alliances.xml")
