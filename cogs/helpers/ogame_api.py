@@ -50,13 +50,13 @@ class OGame_API():
             self.bot.logger.debug(f"Got {file} for {server_id} from cache")
             if int(self.cache[server_id][file].attrib["timestamp"]) + cache_time.get(file, WEEK) < time.time():
                 self.bot.logger.info(f"Le fichier {file} mis en cache à expiré. Re-téléchargement")
-                await self.update(server_id, file)
+                await self.update(server_id, file) # Cache too old
             else:
                 self.bot.logger.debug(f"Le fichier {file} est à jour.")
 
         else:
             self.bot.logger.debug(f"Cache miss for {file} for {server_id}")
-            await self.update(server_id, file)
+            await self.update(server_id, file) # Not in cache need to read from file if there is
 
         return self.cache[server_id][file]
 
@@ -73,8 +73,22 @@ class OGame_API():
 
         await self.create_folder(folder)
 
+
         url = base_url + file
         place = folder + file
+
+        try:
+            tree = etree.parse(place)
+            root = tree.getroot()
+            if int(root.attrib["timestamp"]) + cache_time.get(file, WEEK) > time.time():
+                self.cache[server_id][file] = root
+                self.bot.logger.info(f"Loaded {url} directly from file @ {place}")
+
+                return
+        except OSError:
+            pass
+
+
         self.bot.logger.info(f"Downloading {url} into {place}")
         urllib.request.urlretrieve(url, place)
 
