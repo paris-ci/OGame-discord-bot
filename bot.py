@@ -1,5 +1,5 @@
 #!/usr/bin/env python3.6
-# This is DuckHunt V3
+# This is the OGame Discord Bot V1
 # You have to use it with the rewrite version of discord.py
 # You can install it using
 # pip install -U git+https://github.com/Rapptz/discord.py@rewrite#egg=discord.py[voice]
